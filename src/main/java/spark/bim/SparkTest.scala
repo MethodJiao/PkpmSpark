@@ -67,21 +67,5 @@ object SparkTest {
       }
     }
     sparkSession.stop()
-//    val conf = new SparkConf()
-//    //MongodbSearcher()
-//    conf.setAppName("WordCountLocal")
-//    conf.setMaster("local")
-//    val sparkContext = new SparkContext(conf)
-//    val textFileRDD = sparkContext.textFile("/Library/spark-2.4.4-bin-hadoop2.7/wordsource.txt")
-//    val wordRDD = textFileRDD.flatMap(line => line.split(" "))
-//    val pairWordRDD = wordRDD.map(word => (word, 1))
-//    val wordCountRDD = pairWordRDD.reduceByKey((a, b) => a + b)
-//    wordCountRDD.foreach(keyValue => {
-//      val redisConnect = new Jedis("localhost", 6379, 3000)
-//      redisConnect.lpush("word", keyValue._1)
-//      redisConnect.close()
-//    })
-//    var arrayBuf = new ArrayBuffer[Int]()
-//    wordCountRDD.saveAsTextFile("/Library/spark-2.4.4-bin-hadoop2.7/result")
   }
 }
