@@ -1,13 +1,8 @@
 package spark.bim
 
 import java.util.Properties
-
 import org.apache.kafka.clients.consumer.{ConsumerRecord, ConsumerRecords, KafkaConsumer}
-import org.apache.spark.{SparkConf, SparkContext}
-
-import scala.collection.mutable.ArrayBuffer
 import java.util.Collections
-
 import org.apache.spark.sql.functions._
 import com.mongodb.spark._
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -43,7 +38,6 @@ object SparkTest {
   def main(args: Array[String]): Unit = {
     //mongo spark消息槽
     val sparkSession = SparkSession.builder()
-      .master("local")
       .appName("MongoSparkConnector")
       .config("spark.mongodb.input.uri", "mongodb://127.0.0.1/mydb.netflows")
       .getOrCreate()
@@ -73,21 +67,21 @@ object SparkTest {
       }
     }
     sparkSession.stop()
-    //    val conf = new SparkConf()
-    //    //MongodbSearcher()
-    //    conf.setAppName("WordCountLocal")
-    //    conf.setMaster("local")
-    //        val sparkContext = new SparkContext(conf)
-    //        val textFileRDD = sparkContext.textFile("/Library/spark-2.4.4-bin-hadoop2.7/wordsource.txt")
-    //        val wordRDD = textFileRDD.flatMap(line => line.split(" "))
-    //        val pairWordRDD = wordRDD.map(word => (word, 1))
-    //        val wordCountRDD = pairWordRDD.reduceByKey((a, b) => a + b)
-    //    //    wordCountRDD.foreach(keyValue => {
-    //    //      val redisConnect = new Jedis("localhost", 6379, 3000)
-    //    //      redisConnect.lpush("word", keyValue._1)
-    //    //      redisConnect.close()
-    //    //    })
-    //    var arrayBuf = new ArrayBuffer[Int]()
-    //    wordCountRDD.saveAsTextFile("/Library/spark-2.4.4-bin-hadoop2.7/result")
+//    val conf = new SparkConf()
+//    //MongodbSearcher()
+//    conf.setAppName("WordCountLocal")
+//    conf.setMaster("local")
+//    val sparkContext = new SparkContext(conf)
+//    val textFileRDD = sparkContext.textFile("/Library/spark-2.4.4-bin-hadoop2.7/wordsource.txt")
+//    val wordRDD = textFileRDD.flatMap(line => line.split(" "))
+//    val pairWordRDD = wordRDD.map(word => (word, 1))
+//    val wordCountRDD = pairWordRDD.reduceByKey((a, b) => a + b)
+//    wordCountRDD.foreach(keyValue => {
+//      val redisConnect = new Jedis("localhost", 6379, 3000)
+//      redisConnect.lpush("word", keyValue._1)
+//      redisConnect.close()
+//    })
+//    var arrayBuf = new ArrayBuffer[Int]()
+//    wordCountRDD.saveAsTextFile("/Library/spark-2.4.4-bin-hadoop2.7/result")
   }
 }
