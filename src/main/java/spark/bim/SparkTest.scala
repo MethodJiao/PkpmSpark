@@ -30,7 +30,7 @@ object SparkTest {
 
   //写入redis
   def RedisInserter(name: String): Unit = {
-    val redisConnect = new Jedis("localhost", 6379, 3000)
+    val redisConnect = new Jedis("10.100.140.35", 6379, 3000)
     redisConnect.lpush("name", name)
     redisConnect.close()
   }
@@ -38,13 +38,13 @@ object SparkTest {
   def main(args: Array[String]): Unit = {
     //mongo spark消息槽
     val sparkSession = SparkSession.builder()
-      .appName("MongoSparkConnector")
-      .config("spark.mongodb.input.uri", "mongodb://127.0.0.1/mydb.netflows")
+      .appName("PKPMBimAnalyse")
+      .config("spark.mongodb.input.uri", "mongodb://10.100.140.35/mydb.netflows")
       .getOrCreate()
     //kafka配置
     val TOPIC = "flume1"
     val props = new Properties()
-    props.put("bootstrap.servers", "localhost:9092")
+    props.put("bootstrap.servers", "10.100.140.35:9092")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("group.id", "groupA")
