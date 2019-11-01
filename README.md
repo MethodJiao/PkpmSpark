@@ -32,7 +32,7 @@ bin/spark-submit --class spark.bim.SparkMainTask --master spark://10.100.140.35:
 2.jar包编译路径 /Users/method.jiao/code/pkpmspark/target/pkpmspark-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 ## PS
-如果想在idea直接启动不上传task到spark集群的话需要在sparksession加个.master("local")如：
+1.如果想在idea直接本地启动不上传task到spark集群的话需要在sparksession加个.master("local")如：
 ```
 val sparkSession = SparkSession.builder()
   .appName("PKPMBimAnalyse")
@@ -40,4 +40,13 @@ val sparkSession = SparkSession.builder()
   .master("local")
   .getOrCreate()
 ```
-如果上传task到集群务必去掉master属性
+2.如果上传task到集群务必去掉master属性
+
+3.如果想在idea远程提交并调试 如：
+```
+val sparkSession = SparkSession.builder()
+  .appName("PKPMBimAnalyse")
+  .config("spark.mongodb.input.uri", "mongodb://10.100.140.35/mydb.netflows")
+  .master("spark://10.100.140.35:7077")
+  .getOrCreate()
+```
