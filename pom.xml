@@ -12,7 +12,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <!--下面必须指定好主类 如com.my.Main -->
-                            <mainClass>spark.bim.SparkTest</mainClass>
+                            <mainClass>spark.bim.SparkMainTask</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
