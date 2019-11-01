@@ -5,9 +5,13 @@
 ## 环境配置
 1.mongodb中需含有名称为mydb数据库与名为netflows的collection
 
-2.本机需要配置kafka 并新建topic名称为order
+2.需要配置kafka 并新建topic名称为order
 
-3.本机需配置redis，无用户名密码登录
+3.需配置redis，无用户名密码登录
+
+4.需spark运行环境 2.4.4测试通过
+
+5.需scala sdk 2.11.12测试通过
 ## 程序配置
 1.kafka消费实例配置在OrderTopicKafka类中，请跟据需要修改，可由工厂模式附加新构造上去
 
