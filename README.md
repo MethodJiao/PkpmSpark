@@ -1,7 +1,7 @@
 # PkpmSpark
 大数据处理框架spark运算程序
 ## 机理
-由kafka触发本程序运算，计算完成后的结果存入redis
+由kafka触发本程序运算，获取mongodb中数据进行分析运算，最后计算完成后的结果存入redis
 ## 环境配置
 1.mongodb中需含有名称为mydb数据库与名为netflows的collection
 
