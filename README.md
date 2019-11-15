@@ -20,7 +20,7 @@
 3.mongodb链接实例配置在SparkMainTask的main函数中，请跟据需要修改
 ## 编译
 本项目配置了maven编译，在idea命令行执行`mvn assembly:assembly`即可编译生成
-##运行
+## 运行
 示例：
 ```
 bin/spark-submit --class spark.bim.SparkMainTask --master spark://10.100.140.35:7077 /Users/method.jiao/code/pkpmspark/target/pkpmspark-1.0-SNAPSHOT-jar-with-dependencies.jar
