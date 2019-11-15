@@ -2,9 +2,10 @@ package spark.bim
 
 import java.time.Duration
 
+import com.google.gson.annotations.Until
 import com.mongodb.spark._
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import redis.clients.jedis.Jedis
 import spark.bim.kafkaConnect.KafkaFactory
 import spark.bim.redisConnect.RedisConnector
@@ -17,8 +18,8 @@ object SparkMainTask {
     val dataFrame = MongoSpark.load(sparkSession)
     //dataFrame.show()
     dataFrame.createOrReplaceTempView("netflows")
-    var resultDataFrame = sparkSession.sql("select name from netflows")
-    resultDataFrame = resultDataFrame.groupBy("name").count().orderBy(desc("count"))
+    var resultDataFrame = sparkSession.sql("select RootNode.ChildNode.HighPt,RootNode.ChildNode.LowPt from netflows")
+    resultDataFrame = resultDataFrame.distinct()
     //resultDataFrame.show()
     resultDataFrame
   }
@@ -33,7 +34,18 @@ object SparkMainTask {
     val sparkSession = SparkSession.builder()
       .appName("PKPMBimAnalyse")
       .config("spark.mongodb.input.uri", "mongodb://10.100.140.35/mydb.netflows")
+      .master("local")
       .getOrCreate()
+
+    val resultDateFrame = MongodbSearcher(sparkSession)
+    resultDateFrame.foreach(document => {
+      val documentSize = document.size
+      for(listIndex <- 0 until documentSize)
+      document.getList(listIndex).toArray.foreach(line=>{
+        print(line)
+      })
+    })
+
 
     val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
     val redisConnect = new RedisConnector().GetRedisConnect()
@@ -45,6 +57,7 @@ object SparkMainTask {
       while (iterator.hasNext) {
         //查mongo
         val resultDateFrame = MongodbSearcher(sparkSession)
+
         val array = resultDateFrame.collect()
         if (array.length > 0) {
           RedisInserter(array(0)(0).toString, redisConnect)
