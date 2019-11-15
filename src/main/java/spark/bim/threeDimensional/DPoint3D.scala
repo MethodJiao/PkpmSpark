@@ -6,10 +6,13 @@ class DPoint3D(mx: Int, my: Int, mz: Int) {
   var y: Int = my
   var z: Int = mz
 
-  //逆90度
+  //依据极坐标圆方程化简式
+  //x` = x * cos(α) - y * sin(α)
+  //y` = y * cos(α) + x * sin(α)
+  //顺90度
   def rotation(rx: Int, ry: Int): Unit = {
-    val tempX = -(y - ry) + rx;
-    val tempY = (x - rx) + ry
+    val tempX = (y - ry) + rx;
+    val tempY = -(x - rx) + ry
     x = tempX
     y = tempY
   }
