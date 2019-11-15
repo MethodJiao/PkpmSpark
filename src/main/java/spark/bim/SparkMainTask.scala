@@ -2,10 +2,8 @@ package spark.bim
 
 import java.time.Duration
 
-import com.google.gson.annotations.Until
 import com.mongodb.spark._
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import redis.clients.jedis.Jedis
 import spark.bim.kafkaConnect.KafkaFactory
 import spark.bim.redisConnect.RedisConnector
@@ -29,6 +27,7 @@ object SparkMainTask {
     redisConnect.lpush("name", name)
   }
 
+
   def main(args: Array[String]): Unit = {
     //mongo spark通信槽
     val sparkSession = SparkSession.builder()
@@ -46,7 +45,6 @@ object SparkMainTask {
       })
     })
 
-
     val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
     val redisConnect = new RedisConnector().GetRedisConnect()
 
@@ -57,7 +55,6 @@ object SparkMainTask {
       while (iterator.hasNext) {
         //查mongo
         val resultDateFrame = MongodbSearcher(sparkSession)
-
         val array = resultDateFrame.collect()
         if (array.length > 0) {
           RedisInserter(array(0)(0).toString, redisConnect)
