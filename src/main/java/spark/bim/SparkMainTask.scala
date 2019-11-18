@@ -56,8 +56,6 @@ object SparkMainTask {
       val lowPt = lowAndHigh._2.toSeq
       val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
       val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
-      val vo = VolumeAlgorithm.OrthogonalVolume(highPt3D, lowPt3D)
-      › ›
       totalVolume += VolumeAlgorithm.OrthogonalVolume(highPt3D, lowPt3D)
     }
     totalVolume
@@ -79,8 +77,6 @@ object SparkMainTask {
 
     //UDF注册
     val UCalculateVolume = udf(UdfCalculateVolume _)
-    //UDF注册
-    val UCalculatePercent = udf(UdfCalculatePercent _)
 
     var resultDataFrame = MongodbSearcher(sparkSession)
     //新增一列TotalVolume计算总体积
