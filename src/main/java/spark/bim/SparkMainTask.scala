@@ -25,6 +25,32 @@ object SparkMainTask {
     //resultDataFrame.show()
     resultDataFrame
   }
+  //长方体求相交体积
+  def OverlappingVolume(highPtOfCuboid1:DPoint3D,lowPtOfCuboid1:DPoint3D,highPtOfCuboid2:DPoint3D,lowPtOfCuboid2:DPoint3D): Double ={
+    if(highPtOfCuboid1.z <= lowPtOfCuboid2.z || highPtOfCuboid2.z <= lowPtOfCuboid1.z)
+      return 0
+    else if(highPtOfCuboid1.x <= lowPtOfCuboid2.x || highPtOfCuboid2.x <= lowPtOfCuboid1.x)
+      return 0
+    else if(highPtOfCuboid1.y <= lowPtOfCuboid2.y || highPtOfCuboid2.y <= lowPtOfCuboid1.y)
+      return 0
+
+    var zOverlapping:Int = 0
+    if(highPtOfCuboid1.z < highPtOfCuboid2.z)
+    {
+      zOverlapping = highPtOfCuboid1.z - lowPtOfCuboid2.z
+    }
+    else
+    {
+      zOverlapping = highPtOfCuboid2.z - lowPtOfCuboid1.z
+    }
+
+    val minX:Int=math.max(lowPtOfCuboid1.x, lowPtOfCuboid2.x)
+    val minY:Int=math.max(lowPtOfCuboid1.y, lowPtOfCuboid2.y)
+    val maxX:Int=math.min(highPtOfCuboid1.x, highPtOfCuboid2.x)
+    val maxY:Int=math.min(highPtOfCuboid1.y, highPtOfCuboid2.y)
+
+    return ((maxX-minX)/1000)*((maxY-minY)/1000)*zOverlapping/1000
+  }
 
   //写入redis
   def RedisInserter(name: String, redisConnect: Jedis): Unit = {
@@ -54,20 +80,14 @@ object SparkMainTask {
       .master("local")
       .getOrCreate()
 
-    //UDF注册
-    val UCalculateVolume = udf(UdfCalculateVolume _)
-
-    var resultDataFrame = MongodbSearcher(sparkSession)
-    resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("HighPt"), col("LowPt")))
-    resultDataFrame.show()
-
-    //    resultDataFrame.foreach(document => {
-    //      val documentSize = document.size
-    //      for (listIndex <- 0 until documentSize)
-    //        document.getList(listIndex).toArray.foreach(line => {
-    //          print(line)
-    //        })
-    //    })
+    val resultDateFrame = MongodbSearcher(sparkSession)
+    resultDateFrame.foreach(document => {
+      val documentSize = document.size
+      for(listIndex <- 0 until documentSize)
+      document.getList(listIndex).toArray.foreach(line=>{
+        print(line)
+      })
+    })
 
     val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
     val redisConnect = new RedisConnector().GetRedisConnect()
@@ -91,3 +111,4 @@ object SparkMainTask {
     sparkSession.stop()
   }
 }
+
