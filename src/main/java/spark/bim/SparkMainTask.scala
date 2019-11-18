@@ -27,6 +27,7 @@ object SparkMainTask {
   }
   //长方体求相交体积
   def OverlappingVolume(highPtOfCuboid1:DPoint3D,lowPtOfCuboid1:DPoint3D,highPtOfCuboid2:DPoint3D,lowPtOfCuboid2:DPoint3D): Double ={
+
     if(highPtOfCuboid1.z <= lowPtOfCuboid2.z || highPtOfCuboid2.z <= lowPtOfCuboid1.z)
       return 0
     else if(highPtOfCuboid1.x <= lowPtOfCuboid2.x || highPtOfCuboid2.x <= lowPtOfCuboid1.x)
@@ -34,22 +35,16 @@ object SparkMainTask {
     else if(highPtOfCuboid1.y <= lowPtOfCuboid2.y || highPtOfCuboid2.y <= lowPtOfCuboid1.y)
       return 0
 
-    var zOverlapping:Int = 0
-    if(highPtOfCuboid1.z < highPtOfCuboid2.z)
-    {
-      zOverlapping = highPtOfCuboid1.z - lowPtOfCuboid2.z
-    }
-    else
-    {
-      zOverlapping = highPtOfCuboid2.z - lowPtOfCuboid1.z
-    }
 
     val minX:Int=math.max(lowPtOfCuboid1.x, lowPtOfCuboid2.x)
     val minY:Int=math.max(lowPtOfCuboid1.y, lowPtOfCuboid2.y)
+    val minZ:Int=math.max(lowPtOfCuboid1.z, lowPtOfCuboid2.z)
     val maxX:Int=math.min(highPtOfCuboid1.x, highPtOfCuboid2.x)
     val maxY:Int=math.min(highPtOfCuboid1.y, highPtOfCuboid2.y)
+    val maxZ:Int=math.min(highPtOfCuboid1.z, highPtOfCuboid2.z)
 
-    return ((maxX-minX)/1000)*((maxY-minY)/1000)*zOverlapping/1000
+
+    return ((maxX-minX)/1000)*((maxY-minY)/1000)*((maxZ-minZ)/1000)
   }
 
   //写入redis
