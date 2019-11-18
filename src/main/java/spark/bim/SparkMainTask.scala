@@ -3,11 +3,12 @@ package spark.bim
 import com.mongodb.spark._
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import redis.clients.jedis.Jedis
 import spark.bim.threeDimensional.{Cube3D, DPoint3D, VolumeAlgorithm}
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object SparkMainTask {
 
@@ -39,7 +40,7 @@ object SparkMainTask {
     val maxY: Int = math.min(highPtOfCuboid1.y, highPtOfCuboid2.y)
     val maxZ: Int = math.min(highPtOfCuboid1.z, highPtOfCuboid2.z)
 
-    return ((maxX - minX) / 1000) * ((maxY - minY) / 1000) * ((maxZ - minZ) / 1000)
+    ((maxX - minX) / 1000) * ((maxY - minY) / 1000) * ((maxZ - minZ) / 1000)
   }
 
   //写入redis
@@ -61,10 +62,26 @@ object SparkMainTask {
     totalVolume
   }
 
-  //UDF交叠最大百分比
-  def UdfCalculatePercent(highPts: mutable.WrappedArray[GenericRow], lowPts: mutable.WrappedArray[GenericRow], totalVolume: Double): Double = {
+  def GetCube3DList(row: Row): ArrayBuffer[Cube3D] = {
+    val highPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](0)
+    val lowPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](1)
+    val lowHighZip = highPts.zip(lowPts)
+    val cubeList = ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
+    lowHighZip.foreach(lowHigh => {
+      val highPt = lowHigh._1.toSeq
+      val lowPt = lowHigh._2.toSeq
+      val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
+      val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
+      val cube3d = new Cube3D(lowPt3D, highPt3D)
+      cubeList += cube3d
+    })
+    cubeList
+  }
 
-    totalVolume
+  //UDF交叠最大百分比
+  def CalculatePercent(cubeList1: ArrayBuffer[Cube3D], cubeList2: ArrayBuffer[Cube3D], cubeVolume1: Double, cubeVolume2: Double): Double = {
+    print(cubeVolume1)
+    cubeVolume1
   }
 
   def main(args: Array[String]): Unit = {
@@ -82,37 +99,17 @@ object SparkMainTask {
     //新增一列TotalVolume计算总体积
     resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("HighPt"), col("LowPt")))
     resultDataFrame.show()
+
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
-      val highPts1: mutable.WrappedArray[GenericRow] = tableRow1.getAs[mutable.WrappedArray[GenericRow]](0)
-      val lowPts1: mutable.WrappedArray[GenericRow] = tableRow1.getAs[mutable.WrappedArray[GenericRow]](1)
-      val lowHighZip1 = highPts1.zip(lowPts1)
-      val cubeList1 = scala.collection.mutable.ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
-      lowHighZip1.foreach(lowHigh => {
-        val highPt = lowHigh._1.toSeq
-        val lowPt = lowHigh._2.toSeq
-        val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
-        val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
-        val cube3d = new Cube3D(lowPt3D, highPt3D)
-        cubeList1 += cube3d
-      })
+      val cubeList1 = GetCube3DList(tableRow1)
       for (tableRow2 <- dataFrame) {
         //同表循环2
         if (tableRow1 != tableRow2) {
-          val highPts2: mutable.WrappedArray[GenericRow] = tableRow2.getAs[mutable.WrappedArray[GenericRow]](0)
-          val lowPts2: mutable.WrappedArray[GenericRow] = tableRow2.getAs[mutable.WrappedArray[GenericRow]](1)
-          val lowHighZip2 = highPts2.zip(lowPts2)
-          val cubeList2 = scala.collection.mutable.ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
-          lowHighZip2.foreach(lowHigh => {
-            val highPt = lowHigh._1.toSeq
-            val lowPt = lowHigh._2.toSeq
-            val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
-            val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
-            val cube3d = new Cube3D(lowPt3D, highPt3D)
-            cubeList2 += cube3d
-          })
+          val cubeList2 = GetCube3DList(tableRow2)
           //这里开始计算最大交叠
+          CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
           print(cubeList1)
           print(cubeList2)
         }
