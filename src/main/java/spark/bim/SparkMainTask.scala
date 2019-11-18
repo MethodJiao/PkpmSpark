@@ -80,34 +80,31 @@ object SparkMainTask {
       .master("local")
       .getOrCreate()
 
-    val resultDateFrame = MongodbSearcher(sparkSession)
-    resultDateFrame.foreach(document => {
-      val documentSize = document.size
-      for(listIndex <- 0 until documentSize)
-      document.getList(listIndex).toArray.foreach(line=>{
-        print(line)
-      })
-    })
+    val UCalculateVolume = udf(UdfCalculateVolume _)
 
-    val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
-    val redisConnect = new RedisConnector().GetRedisConnect()
+    var resultDataFrame = MongodbSearcher(sparkSession)
+    resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("HighPt"), col("LowPt")))
+    resultDataFrame.show()
 
-    //rdd计算部分
-    while (true) {
-      val records = kafkaConsumer.poll(Duration.ofMillis(100)) //task触发源
-      val iterator = records.iterator()
-      while (iterator.hasNext) {
-        //查mongo
-        val resultDateFrame = MongodbSearcher(sparkSession)
-        val array = resultDateFrame.collect()
-        if (array.length > 0) {
-          RedisInserter(array(0)(0).toString, redisConnect)
-        }
-        iterator.next()
-      }
-    }
-    kafkaConsumer.close()
-    redisConnect.close()
+//    val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
+//    val redisConnect = new RedisConnector().GetRedisConnect()
+//
+//    //rdd计算部分
+//    while (true) {
+//      val records = kafkaConsumer.poll(Duration.ofMillis(100)) //task触发源
+//      val iterator = records.iterator()
+//      while (iterator.hasNext) {
+//        //查mongo
+//        val resultDateFrame = MongodbSearcher(sparkSession)
+//        val array = resultDateFrame.collect()
+//        if (array.length > 0) {
+//          RedisInserter(array(0)(0).toString, redisConnect)
+//        }
+//        iterator.next()
+//      }
+//    }
+//    kafkaConsumer.close()
+//    redisConnect.close()
     sparkSession.stop()
   }
 }
