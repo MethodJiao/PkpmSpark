@@ -26,21 +26,88 @@ object SparkMainTask {
   //长方体求相交体积
   def OverlappingVolume(highPtOfCuboid1: DPoint3D, lowPtOfCuboid1: DPoint3D, highPtOfCuboid2: DPoint3D, lowPtOfCuboid2: DPoint3D): Double = {
 
-    if (highPtOfCuboid1.z <= lowPtOfCuboid2.z || highPtOfCuboid2.z <= lowPtOfCuboid1.z)
+    var BigX1:Int=0;
+    var LittleX1:Int=0;
+    var BigX2:Int=0;
+    var LittleX2:Int=0;
+    var BigY1:Int=0;
+    var LittleY1:Int=0;
+    var BigY2:Int=0;
+    var LittleY2:Int=0;
+    var BigZ1:Int=0;
+    var LittleZ1:Int=0;
+    var BigZ2:Int=0;
+    var LittleZ2:Int=0;
+    //X
+    if(highPtOfCuboid1.x<=lowPtOfCuboid1.x){
+      BigX1=lowPtOfCuboid1.x;
+      LittleX1=highPtOfCuboid1.x;
+    }
+    else{
+      BigX1=highPtOfCuboid1.x;
+      LittleX1=lowPtOfCuboid1.x
+    }
+    if(highPtOfCuboid2.x<=lowPtOfCuboid2.x){
+      BigX2=lowPtOfCuboid2.x;
+      LittleX2=highPtOfCuboid2.x;
+    }
+    else{
+      BigX2=highPtOfCuboid2.x;
+      LittleX2=lowPtOfCuboid2.x;
+    }
+
+    //Y
+    if(highPtOfCuboid1.y<=lowPtOfCuboid1.y){
+      BigY1=lowPtOfCuboid1.y;
+      LittleY1=highPtOfCuboid1.y;
+    }
+    else{
+      BigY1=highPtOfCuboid1.y;
+      LittleY1=lowPtOfCuboid1.y;
+    }
+    if(highPtOfCuboid2.y<=lowPtOfCuboid2.y){
+      BigY2=lowPtOfCuboid2.y;
+      LittleY2=highPtOfCuboid2.y;
+    }
+    else{
+      BigY2=highPtOfCuboid2.y;
+      LittleY2=lowPtOfCuboid2.y;
+    }
+
+    //Z
+    if(highPtOfCuboid1.z<=lowPtOfCuboid1.z){
+      BigZ1=lowPtOfCuboid1.z;
+      LittleZ1=highPtOfCuboid1.z;
+    }
+    else{
+      BigZ1=highPtOfCuboid1.z;
+      LittleZ1=lowPtOfCuboid1.z;
+    }
+    if(highPtOfCuboid2.z<=lowPtOfCuboid2.z){
+      BigZ2=lowPtOfCuboid2.z;
+      LittleZ1=highPtOfCuboid2.z;
+    }
+    else{
+      BigZ2=highPtOfCuboid2.z;
+      LittleZ2=lowPtOfCuboid2.z;
+    }
+
+    if (BigX1 <= LittleX2 || BigX2 <= LittleX1)
       return 0
-    else if (highPtOfCuboid1.x <= lowPtOfCuboid2.x || highPtOfCuboid2.x <= lowPtOfCuboid1.x)
+    else if (BigY1 <= LittleY2 || BigY2 <= LittleY1)
       return 0
-    else if (highPtOfCuboid1.y <= lowPtOfCuboid2.y || highPtOfCuboid2.y <= lowPtOfCuboid1.y)
+    else if (BigZ1 <= LittleZ2 || BigZ2 <= LittleZ1)
       return 0
 
-    val minX: Int = math.max(lowPtOfCuboid1.x, lowPtOfCuboid2.x)
-    val minY: Int = math.max(lowPtOfCuboid1.y, lowPtOfCuboid2.y)
-    val minZ: Int = math.max(lowPtOfCuboid1.z, lowPtOfCuboid2.z)
-    val maxX: Int = math.min(highPtOfCuboid1.x, highPtOfCuboid2.x)
-    val maxY: Int = math.min(highPtOfCuboid1.y, highPtOfCuboid2.y)
-    val maxZ: Int = math.min(highPtOfCuboid1.z, highPtOfCuboid2.z)
+    val minX: Int = math.max(LittleX1, LittleX2)
+    val minY: Int = math.max(LittleY1, LittleY2)
+    val minZ: Int = math.max(LittleZ1, LittleZ2)
+    val maxX: Int = math.min(BigX1, BigX2)
+    val maxY: Int = math.min(BigY1, BigY2)
+    val maxZ: Int = math.min(BigZ1, BigZ2)
 
-    ((maxX - minX) / 1000) * ((maxY - minY) / 1000) * ((maxZ - minZ) / 1000)
+    val ret:Double=((maxX - minX) / 1000.0) * ((maxY - minY) / 1000.0) * ((maxZ - minZ) / 1000.0)
+    return ret;
   }
 
   //写入redis
