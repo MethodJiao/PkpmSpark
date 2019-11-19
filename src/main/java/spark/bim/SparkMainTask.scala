@@ -62,6 +62,7 @@ object SparkMainTask {
     totalVolume
   }
 
+  //获取单条数据内的立方体合集
   def GetCube3DList(row: Row): ArrayBuffer[Cube3D] = {
     val highPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](0)
     val lowPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](1)
@@ -78,10 +79,153 @@ object SparkMainTask {
     cubeList
   }
 
-  //UDF交叠最大百分比
+  //交叠最大百分比
   def CalculatePercent(cubeList1: ArrayBuffer[Cube3D], cubeList2: ArrayBuffer[Cube3D], cubeVolume1: Double, cubeVolume2: Double): Double = {
-    print(cubeVolume1)
-    cubeVolume1
+    var cube1MiniX, cube1MaxX = cubeList1.head.high.x
+    var cube1MiniY, cube1MaxY = cubeList1.head.high.y
+    var cube1MiniZ, cube1MaxZ = cubeList1.head.high.z
+
+    var cube2MiniX, cube2MaxX = cubeList2.head.high.x
+    var cube2MiniY, cube2MaxY = cubeList2.head.high.y
+    var cube2MiniZ, cube2MaxZ = cubeList2.head.high.z
+
+    cubeList1.foreach(cube3d => {
+      if (cube3d.high.x < cube1MiniX) {
+        cube1MiniX = cube3d.high.x
+      }
+      else if (cube3d.low.x < cube1MiniX) {
+        cube1MiniX = cube3d.low.x
+      }
+      if (cube3d.high.x > cube1MaxX) {
+        cube1MaxX = cube3d.high.x
+      }
+      else if (cube3d.low.x > cube1MaxX) {
+        cube1MaxX = cube3d.low.x
+      }
+
+      if (cube3d.high.y < cube1MiniY) {
+        cube1MiniY = cube3d.high.y
+      }
+      else if (cube3d.low.y < cube1MiniY) {
+        cube1MiniY = cube3d.low.y
+      }
+      if (cube3d.high.y > cube1MaxY) {
+        cube1MaxY = cube3d.high.y
+      }
+      else if (cube3d.low.y > cube1MaxY) {
+        cube1MaxY = cube3d.low.y
+      }
+
+      if (cube3d.high.z < cube1MiniZ) {
+        cube1MiniZ = cube3d.high.z
+      }
+      else if (cube3d.low.z < cube1MiniZ) {
+        cube1MiniZ = cube3d.low.z
+      }
+      if (cube3d.high.z > cube1MaxZ) {
+        cube1MaxZ = cube3d.high.z
+      }
+      else if (cube3d.low.z > cube1MaxZ) {
+        cube1MaxZ = cube3d.low.z
+      }
+
+    })
+
+    cubeList2.foreach(cube3d => {
+      if (cube3d.high.x < cube2MiniX) {
+        cube2MiniX = cube3d.high.x
+      }
+      else if (cube3d.low.x < cube2MiniX) {
+        cube2MiniX = cube3d.low.x
+      }
+      if (cube3d.high.x > cube2MaxX) {
+        cube2MaxX = cube3d.high.x
+      }
+      else if (cube3d.low.x > cube2MaxX) {
+        cube2MaxX = cube3d.low.x
+      }
+
+      if (cube3d.high.y < cube2MiniY) {
+        cube2MiniY = cube3d.high.y
+      }
+      else if (cube3d.low.y < cube2MiniY) {
+        cube2MiniY = cube3d.low.y
+      }
+      if (cube3d.high.y > cube2MaxY) {
+        cube2MaxY = cube3d.high.y
+      }
+      else if (cube3d.low.y > cube2MaxY) {
+        cube2MaxY = cube3d.low.y
+      }
+
+      if (cube3d.high.z < cube2MiniZ) {
+        cube2MiniZ = cube3d.high.z
+      }
+      else if (cube3d.low.z < cube2MiniZ) {
+        cube2MiniZ = cube3d.low.z
+      }
+      if (cube3d.high.z > cube2MaxZ) {
+        cube2MaxZ = cube3d.high.z
+      }
+      else if (cube3d.low.z > cube2MaxZ) {
+        cube2MaxZ = cube3d.low.z
+      }
+
+    })
+    //x要移动距离
+    val distanceX = math.abs(cube2MaxX - cube2MiniX) + math.abs(cube1MaxX - cube1MiniX)
+    val distanceY = math.abs(cube2MaxY - cube2MiniY) + math.abs(cube1MaxY - cube1MiniY)
+    val distanceZ = math.abs(cube2MaxZ - cube2MiniZ) + math.abs(cube1MaxZ - cube1MiniZ)
+    //初始位置设定
+    val offsetX = cube1MiniX - cube2MaxX
+    val offsetY = cube1MiniY - cube2MaxY
+    val offsetZ = cube1MiniZ - cube2MaxZ
+    cubeList2.foreach(cube3D => {
+      cube3D.low.x += offsetX
+      cube3D.high.x += offsetX
+      cube3D.low.y += offsetY
+      cube3D.high.y += offsetY
+      cube3D.low.z += offsetZ
+      cube3D.high.z += offsetZ
+    })
+    var maxTotalPercent = 0.0
+    //开始三维对比
+    //x维度
+    for (xValue <- 0 to(distanceX, 100)) {
+      //y维度
+      for (yValue <- 0 to(distanceY, 100)) {
+        //z维度
+        for (zValue <- 0 to(distanceZ, 100)) {
+
+          //val totalPercent=ForEach3D(cubeList1, cubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
+          val totalPercent = ForEach3D(cubeList1, cubeList2, 6700, 6700, 3400, cubeVolume1, cubeVolume2)
+          if (totalPercent > maxTotalPercent) {
+            maxTotalPercent = totalPercent
+          }
+        }
+      }
+    }
+    maxTotalPercent
+  }
+
+  def ForEach3D(cubeList1: ArrayBuffer[Cube3D], cubeList2: ArrayBuffer[Cube3D], xValue: Int, yValue: Int, zValue: Int, cubeVolume1: Double, cubeVolume2: Double): Double = {
+    var overlapTotalVolume = 0.0
+    cubeList2.foreach(cube2 => {
+      cube2.high.x += xValue
+      cube2.high.y += yValue
+      cube2.high.z += zValue
+      cube2.low.x += xValue
+      cube2.low.y += yValue
+      cube2.low.z += zValue
+      cubeList1.foreach(cube1 => {
+        val overlapVolume = OverlappingVolume(cube1.low, cube1.high, cube2.low, cube2.high)
+        overlapTotalVolume += overlapVolume
+      })
+    })
+    val cubeList1Percent = overlapTotalVolume / cubeVolume1
+    val cubeList2Percent = overlapTotalVolume / cubeVolume2
+    val totalPercent = math.sqrt(cubeList1Percent * cubeList2Percent)
+    totalPercent
   }
 
   def main(args: Array[String]): Unit = {

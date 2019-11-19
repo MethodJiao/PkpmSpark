@@ -16,4 +16,8 @@ class DPoint3D(mx: Int, my: Int, mz: Int) {
     x = tempX
     y = tempY
   }
+
+  def distance(pt: DPoint3D): Double = {
+    math.sqrt(math.pow((x - pt.x), 2) + math.pow((y - pt.y), 2) + math.pow((z - pt.z), 2))
+  }
 }
