@@ -54,7 +54,6 @@ object SparkMainTask {
     cubeList
   }
 
-
   def main(args: Array[String]): Unit = {
     //mongo spark通信槽
     val sparkSession = SparkSession.builder()
@@ -67,14 +66,13 @@ object SparkMainTask {
     val UCalculateVolume = udf(UdfCalculateVolume _)
 
     var resultDataFrame = MongodbSearcher(sparkSession)
-    //新增一列TotalVolume计算总体积
+    //新增列TotalVolume计算总体积 TotalJson整行json数据
     resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt")))
     resultDataFrame = resultDataFrame.withColumn("TotalJson", to_json(col("RootNode")))
+    resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
     resultDataFrame.show()
 
     val redisConnect = new RedisConnector().GetRedisConnect()
-    resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
-    resultDataFrame.show()
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
@@ -91,6 +89,7 @@ object SparkMainTask {
         }
       }
     }
+
     //    resultDataFrame = resultDataFrame.withColumn("Percent", UCalculatePercent(col("HighPt"), col("LowPt"), col("TotalVolume")))
     //    resultDataFrame.show()
 
@@ -121,6 +120,7 @@ object SparkMainTask {
     //    }
     //    kafkaConsumer.close()
     //    redisConnect.close()
+    redisConnect.close()
     sparkSession.stop()
   }
 }
