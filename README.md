@@ -1,11 +1,11 @@
 # PkpmSpark
-大数据处理框架spark运算程序
+大数据分析 三维数据挖掘运算分析程序
 ## 机理
-由kafka触发本程序运算，获取mongodb中数据进行分析运算，最后计算完成后的结果存入redis
+获取mongodb中存储的三维数据进行分析,归并,聚合,加权运算，最后计算完成后的结果存入redis
 ## 环境配置
 1.mongodb中需含有名称为mydb数据库与名为netflows的collection
 
-2.需要配置kafka 并新建topic名称为order
+2.需要配置kafka 并新建topic名称为order(若不需要由kafka做触发源则不用配置)
 
 3.需配置redis，无用户名密码登录
 
