@@ -11,21 +11,17 @@ class DPoint3D(mx: Int, my: Int, mz: Int) {
   //y` = y * cos(α) + x * sin(α)
   //顺90度
   def rotation(rx: Int, ry: Int): Unit = {
-    val tempX = (y - ry) + rx;
+    val tempX = (y - ry) + rx
     val tempY = -(x - rx) + ry
     x = tempX
     y = tempY
   }
 
   def distance(pt: DPoint3D): Double = {
-    math.sqrt(math.pow((x - pt.x), 2) + math.pow((y - pt.y), 2) + math.pow((z - pt.z), 2))
+    math.sqrt(math.pow(x - pt.x, 2) + math.pow(y - pt.y, 2) + math.pow(z - pt.z, 2))
   }
 
   override def clone(): AnyRef = {
-    val dPoint3D = new DPoint3D(this.x, this.y, this.z)
-    //    dPoint3D.x =
-    //    dPoint3D.y =
-    //    dPoint3D.z =
-    dPoint3D
+    new DPoint3D(this.x, this.y, this.z)
   }
 }
