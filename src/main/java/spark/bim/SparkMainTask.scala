@@ -36,6 +36,25 @@ object SparkMainTask {
     totalVolume
   }
 
+  //哈希算法
+  def HashString(str: String): Int = {
+    var hashCode = 0
+    if (hashCode == 0 && str.length > 0) {
+      val subChar = str
+      var i = 0
+      while ( {
+        i < str.length
+      }) {
+        hashCode = 5 * hashCode + subChar(i)
+
+        {
+          i += 1
+          i - 1
+        }
+      }
+    }
+    hashCode
+  }
 
   def main(args: Array[String]): Unit = {
     //mongo spark通信槽
