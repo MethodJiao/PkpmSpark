@@ -4,7 +4,6 @@ import com.mongodb.spark._
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import redis.clients.jedis.Jedis
 import spark.bim.redisConnect.RedisConnector
 import spark.bim.threeDimensional.{Cube3D, DPoint3D, VolumeAlgorithm}
 
@@ -22,11 +21,6 @@ object SparkMainTask {
     resultDataFrame = resultDataFrame.distinct()
     //resultDataFrame.show()
     resultDataFrame
-  }
-
-  //写入redis
-  def RedisInserter(name: String, redisConnect: Jedis): Unit = {
-    redisConnect.lpush("Result", name)
   }
 
   //UDF计算总体积
@@ -92,7 +86,7 @@ object SparkMainTask {
           //开始计算最大交叠
           val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
           if (totalPercent > 0.8) {
-            RedisInserter(tableRow1.getAs[String](3), redisConnect)
+            redisConnect.lpush("Result", tableRow1.getAs[String](3))
           }
         }
       }
