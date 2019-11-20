@@ -18,7 +18,7 @@ object SparkMainTask {
 
     val dataFrame = MongoSpark.load(sparkSession)
     dataFrame.createOrReplaceTempView("netflows")
-    var resultDataFrame = sparkSession.sql("select RootNode.ChildNode.HighPt,RootNode.ChildNode.LowPt from netflows")
+    var resultDataFrame = sparkSession.sql("select * from netflows")
     resultDataFrame = resultDataFrame.distinct()
     //resultDataFrame.show()
     resultDataFrame
@@ -36,8 +36,8 @@ object SparkMainTask {
     for (lowAndHigh <- lowAndHighZip) {
       val highPt = lowAndHigh._1.toSeq
       val lowPt = lowAndHigh._2.toSeq
-      val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
-      val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
+      val highPt3D: DPoint3D = new DPoint3D(highPt.head.##, highPt.apply(1).##, highPt.apply(2).##)
+      val lowPt3D = new DPoint3D(lowPt.head.##, lowPt.apply(1).##, lowPt.apply(2).##)
       totalVolume += VolumeAlgorithm.OrthogonalVolume(highPt3D, lowPt3D)
     }
     totalVolume
@@ -52,8 +52,8 @@ object SparkMainTask {
     lowHighZip.foreach(lowHigh => {
       val highPt = lowHigh._1.toSeq
       val lowPt = lowHigh._2.toSeq
-      val highPt3D: DPoint3D = new DPoint3D(highPt.apply(0).##, highPt.apply(1).##, highPt.apply(2).##)
-      val lowPt3D = new DPoint3D(lowPt.apply(0).##, lowPt.apply(1).##, lowPt.apply(2).##)
+      val highPt3D: DPoint3D = new DPoint3D(highPt.head.##, highPt.apply(1).##, highPt.apply(2).##)
+      val lowPt3D = new DPoint3D(lowPt.head.##, lowPt.apply(1).##, lowPt.apply(2).##)
       val cube3d = new Cube3D(lowPt3D, highPt3D)
       cubeList += cube3d
     })
@@ -74,10 +74,13 @@ object SparkMainTask {
 
     var resultDataFrame = MongodbSearcher(sparkSession)
     //新增一列TotalVolume计算总体积
-    resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("HighPt"), col("LowPt")))
+    resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt")))
+    resultDataFrame = resultDataFrame.withColumn("TotalJson", to_json(col("RootNode")))
     resultDataFrame.show()
 
     val redisConnect = new RedisConnector().GetRedisConnect()
+    resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
+    resultDataFrame.show()
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
@@ -86,14 +89,14 @@ object SparkMainTask {
         //同表循环2
         if (tableRow1 != tableRow2) {
           val cubeList2 = GetCube3DList(tableRow2)
-          //这里开始计算最大交叠
+          //开始计算最大交叠
           val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
-          RedisInserter(totalPercent.toString, redisConnect)
+          if (totalPercent > 0.8) {
+            RedisInserter(tableRow1.getAs[String](3), redisConnect)
+          }
         }
       }
     }
-
-
     //    resultDataFrame = resultDataFrame.withColumn("Percent", UCalculatePercent(col("HighPt"), col("LowPt"), col("TotalVolume")))
     //    resultDataFrame.show()
 
