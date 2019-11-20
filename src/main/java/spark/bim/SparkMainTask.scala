@@ -3,12 +3,11 @@ package spark.bim
 import com.mongodb.spark._
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import spark.bim.redisConnect.RedisConnector
-import spark.bim.threeDimensional.{Cube3D, DPoint3D, VolumeAlgorithm}
+import spark.bim.threeDimensional.{DPoint3D, VolumeAlgorithm}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object SparkMainTask {
 
@@ -37,22 +36,6 @@ object SparkMainTask {
     totalVolume
   }
 
-  //获取单条数据内的立方体合集
-  def GetCube3DList(row: Row): ArrayBuffer[Cube3D] = {
-    val highPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](0)
-    val lowPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](1)
-    val lowHighZip = highPts.zip(lowPts)
-    val cubeList = ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
-    lowHighZip.foreach(lowHigh => {
-      val highPt = lowHigh._1.toSeq
-      val lowPt = lowHigh._2.toSeq
-      val highPt3D: DPoint3D = new DPoint3D(highPt.head.##, highPt.apply(1).##, highPt.apply(2).##)
-      val lowPt3D = new DPoint3D(lowPt.head.##, lowPt.apply(1).##, lowPt.apply(2).##)
-      val cube3d = new Cube3D(lowPt3D, highPt3D)
-      cubeList += cube3d
-    })
-    cubeList
-  }
 
   def main(args: Array[String]): Unit = {
     //mongo spark通信槽
@@ -76,11 +59,11 @@ object SparkMainTask {
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
-      val cubeList1 = GetCube3DList(tableRow1)
+      val cubeList1 = VolumeAlgorithm.GetCube3DList(tableRow1)
       for (tableRow2 <- dataFrame) {
         //同表循环2
         if (tableRow1 != tableRow2) {
-          val cubeList2 = GetCube3DList(tableRow2)
+          val cubeList2 = VolumeAlgorithm.GetCube3DList(tableRow2)
           //开始计算最大交叠
           val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
           if (totalPercent > 0.8) {
@@ -89,7 +72,7 @@ object SparkMainTask {
         }
       }
     }
-
+    resultDataFrame.show()
     //    resultDataFrame = resultDataFrame.withColumn("Percent", UCalculatePercent(col("HighPt"), col("LowPt"), col("TotalVolume")))
     //    resultDataFrame.show()
 

@@ -1,5 +1,9 @@
 package spark.bim.threeDimensional
 
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.catalyst.expressions.GenericRow
+
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 object VolumeAlgorithm {
@@ -15,70 +19,70 @@ object VolumeAlgorithm {
   //长方体求相交体积
   def OverlappingVolume(highPtOfCuboid1: DPoint3D, lowPtOfCuboid1: DPoint3D, highPtOfCuboid2: DPoint3D, lowPtOfCuboid2: DPoint3D): Double = {
 
-    var BigX1: Int = 0;
-    var LittleX1: Int = 0;
-    var BigX2: Int = 0;
-    var LittleX2: Int = 0;
-    var BigY1: Int = 0;
-    var LittleY1: Int = 0;
-    var BigY2: Int = 0;
-    var LittleY2: Int = 0;
-    var BigZ1: Int = 0;
-    var LittleZ1: Int = 0;
-    var BigZ2: Int = 0;
-    var LittleZ2: Int = 0;
+    var BigX1: Int = 0
+    var LittleX1: Int = 0
+    var BigX2: Int = 0
+    var LittleX2: Int = 0
+    var BigY1: Int = 0
+    var LittleY1: Int = 0
+    var BigY2: Int = 0
+    var LittleY2: Int = 0
+    var BigZ1: Int = 0
+    var LittleZ1: Int = 0
+    var BigZ2: Int = 0
+    var LittleZ2: Int = 0
     //X
     if (highPtOfCuboid1.x <= lowPtOfCuboid1.x) {
-      BigX1 = lowPtOfCuboid1.x;
-      LittleX1 = highPtOfCuboid1.x;
+      BigX1 = lowPtOfCuboid1.x
+      LittleX1 = highPtOfCuboid1.x
     }
     else {
-      BigX1 = highPtOfCuboid1.x;
+      BigX1 = highPtOfCuboid1.x
       LittleX1 = lowPtOfCuboid1.x
     }
     if (highPtOfCuboid2.x <= lowPtOfCuboid2.x) {
-      BigX2 = lowPtOfCuboid2.x;
-      LittleX2 = highPtOfCuboid2.x;
+      BigX2 = lowPtOfCuboid2.x
+      LittleX2 = highPtOfCuboid2.x
     }
     else {
-      BigX2 = highPtOfCuboid2.x;
-      LittleX2 = lowPtOfCuboid2.x;
+      BigX2 = highPtOfCuboid2.x
+      LittleX2 = lowPtOfCuboid2.x
     }
 
     //Y
     if (highPtOfCuboid1.y <= lowPtOfCuboid1.y) {
-      BigY1 = lowPtOfCuboid1.y;
-      LittleY1 = highPtOfCuboid1.y;
+      BigY1 = lowPtOfCuboid1.y
+      LittleY1 = highPtOfCuboid1.y
     }
     else {
-      BigY1 = highPtOfCuboid1.y;
-      LittleY1 = lowPtOfCuboid1.y;
+      BigY1 = highPtOfCuboid1.y
+      LittleY1 = lowPtOfCuboid1.y
     }
     if (highPtOfCuboid2.y <= lowPtOfCuboid2.y) {
-      BigY2 = lowPtOfCuboid2.y;
-      LittleY2 = highPtOfCuboid2.y;
+      BigY2 = lowPtOfCuboid2.y
+      LittleY2 = highPtOfCuboid2.y
     }
     else {
-      BigY2 = highPtOfCuboid2.y;
-      LittleY2 = lowPtOfCuboid2.y;
+      BigY2 = highPtOfCuboid2.y
+      LittleY2 = lowPtOfCuboid2.y
     }
 
     //Z
     if (highPtOfCuboid1.z <= lowPtOfCuboid1.z) {
-      BigZ1 = lowPtOfCuboid1.z;
-      LittleZ1 = highPtOfCuboid1.z;
+      BigZ1 = lowPtOfCuboid1.z
+      LittleZ1 = highPtOfCuboid1.z
     }
     else {
-      BigZ1 = highPtOfCuboid1.z;
-      LittleZ1 = lowPtOfCuboid1.z;
+      BigZ1 = highPtOfCuboid1.z
+      LittleZ1 = lowPtOfCuboid1.z
     }
     if (highPtOfCuboid2.z <= lowPtOfCuboid2.z) {
-      BigZ2 = lowPtOfCuboid2.z;
-      LittleZ1 = highPtOfCuboid2.z;
+      BigZ2 = lowPtOfCuboid2.z
+      LittleZ1 = highPtOfCuboid2.z
     }
     else {
-      BigZ2 = highPtOfCuboid2.z;
-      LittleZ2 = lowPtOfCuboid2.z;
+      BigZ2 = highPtOfCuboid2.z
+      LittleZ2 = lowPtOfCuboid2.z
     }
 
     if (BigX1 <= LittleX2 || BigX2 <= LittleX1)
@@ -96,7 +100,7 @@ object VolumeAlgorithm {
     val maxZ: Int = math.min(BigZ1, BigZ2)
 
     val ret: Double = ((maxX - minX) / 1000.0) * ((maxY - minY) / 1000.0) * ((maxZ - minZ) / 1000.0)
-    return ret;
+    ret
   }
 
   //交叠最大百分比
@@ -255,5 +259,22 @@ object VolumeAlgorithm {
     val cubeList2Percent = overlapTotalVolume / cubeVolume2
     val totalPercent = math.sqrt(cubeList1Percent * cubeList2Percent)
     totalPercent
+  }
+
+  //获取单条数据内的立方体合集
+  def GetCube3DList(row: Row): ArrayBuffer[Cube3D] = {
+    val highPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](0)
+    val lowPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](1)
+    val lowHighZip = highPts.zip(lowPts)
+    val cubeList = ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
+    lowHighZip.foreach(lowHigh => {
+      val highPt = lowHigh._1.toSeq
+      val lowPt = lowHigh._2.toSeq
+      val highPt3D: DPoint3D = new DPoint3D(highPt.head.##, highPt.apply(1).##, highPt.apply(2).##)
+      val lowPt3D = new DPoint3D(lowPt.head.##, lowPt.apply(1).##, lowPt.apply(2).##)
+      val cube3d = new Cube3D(lowPt3D, highPt3D)
+      cubeList += cube3d
+    })
+    cubeList
   }
 }
