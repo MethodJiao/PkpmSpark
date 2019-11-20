@@ -26,70 +26,70 @@ object SparkMainTask {
   //长方体求相交体积
   def OverlappingVolume(highPtOfCuboid1: DPoint3D, lowPtOfCuboid1: DPoint3D, highPtOfCuboid2: DPoint3D, lowPtOfCuboid2: DPoint3D): Double = {
 
-    var BigX1:Int=0;
-    var LittleX1:Int=0;
-    var BigX2:Int=0;
-    var LittleX2:Int=0;
-    var BigY1:Int=0;
-    var LittleY1:Int=0;
-    var BigY2:Int=0;
-    var LittleY2:Int=0;
-    var BigZ1:Int=0;
-    var LittleZ1:Int=0;
-    var BigZ2:Int=0;
-    var LittleZ2:Int=0;
+    var BigX1: Int = 0;
+    var LittleX1: Int = 0;
+    var BigX2: Int = 0;
+    var LittleX2: Int = 0;
+    var BigY1: Int = 0;
+    var LittleY1: Int = 0;
+    var BigY2: Int = 0;
+    var LittleY2: Int = 0;
+    var BigZ1: Int = 0;
+    var LittleZ1: Int = 0;
+    var BigZ2: Int = 0;
+    var LittleZ2: Int = 0;
     //X
-    if(highPtOfCuboid1.x<=lowPtOfCuboid1.x){
-      BigX1=lowPtOfCuboid1.x;
-      LittleX1=highPtOfCuboid1.x;
+    if (highPtOfCuboid1.x <= lowPtOfCuboid1.x) {
+      BigX1 = lowPtOfCuboid1.x;
+      LittleX1 = highPtOfCuboid1.x;
     }
-    else{
-      BigX1=highPtOfCuboid1.x;
-      LittleX1=lowPtOfCuboid1.x
+    else {
+      BigX1 = highPtOfCuboid1.x;
+      LittleX1 = lowPtOfCuboid1.x
     }
-    if(highPtOfCuboid2.x<=lowPtOfCuboid2.x){
-      BigX2=lowPtOfCuboid2.x;
-      LittleX2=highPtOfCuboid2.x;
+    if (highPtOfCuboid2.x <= lowPtOfCuboid2.x) {
+      BigX2 = lowPtOfCuboid2.x;
+      LittleX2 = highPtOfCuboid2.x;
     }
-    else{
-      BigX2=highPtOfCuboid2.x;
-      LittleX2=lowPtOfCuboid2.x;
+    else {
+      BigX2 = highPtOfCuboid2.x;
+      LittleX2 = lowPtOfCuboid2.x;
     }
 
     //Y
-    if(highPtOfCuboid1.y<=lowPtOfCuboid1.y){
-      BigY1=lowPtOfCuboid1.y;
-      LittleY1=highPtOfCuboid1.y;
+    if (highPtOfCuboid1.y <= lowPtOfCuboid1.y) {
+      BigY1 = lowPtOfCuboid1.y;
+      LittleY1 = highPtOfCuboid1.y;
     }
-    else{
-      BigY1=highPtOfCuboid1.y;
-      LittleY1=lowPtOfCuboid1.y;
+    else {
+      BigY1 = highPtOfCuboid1.y;
+      LittleY1 = lowPtOfCuboid1.y;
     }
-    if(highPtOfCuboid2.y<=lowPtOfCuboid2.y){
-      BigY2=lowPtOfCuboid2.y;
-      LittleY2=highPtOfCuboid2.y;
+    if (highPtOfCuboid2.y <= lowPtOfCuboid2.y) {
+      BigY2 = lowPtOfCuboid2.y;
+      LittleY2 = highPtOfCuboid2.y;
     }
-    else{
-      BigY2=highPtOfCuboid2.y;
-      LittleY2=lowPtOfCuboid2.y;
+    else {
+      BigY2 = highPtOfCuboid2.y;
+      LittleY2 = lowPtOfCuboid2.y;
     }
 
     //Z
-    if(highPtOfCuboid1.z<=lowPtOfCuboid1.z){
-      BigZ1=lowPtOfCuboid1.z;
-      LittleZ1=highPtOfCuboid1.z;
+    if (highPtOfCuboid1.z <= lowPtOfCuboid1.z) {
+      BigZ1 = lowPtOfCuboid1.z;
+      LittleZ1 = highPtOfCuboid1.z;
     }
-    else{
-      BigZ1=highPtOfCuboid1.z;
-      LittleZ1=lowPtOfCuboid1.z;
+    else {
+      BigZ1 = highPtOfCuboid1.z;
+      LittleZ1 = lowPtOfCuboid1.z;
     }
-    if(highPtOfCuboid2.z<=lowPtOfCuboid2.z){
-      BigZ2=lowPtOfCuboid2.z;
-      LittleZ1=highPtOfCuboid2.z;
+    if (highPtOfCuboid2.z <= lowPtOfCuboid2.z) {
+      BigZ2 = lowPtOfCuboid2.z;
+      LittleZ1 = highPtOfCuboid2.z;
     }
-    else{
-      BigZ2=highPtOfCuboid2.z;
-      LittleZ2=lowPtOfCuboid2.z;
+    else {
+      BigZ2 = highPtOfCuboid2.z;
+      LittleZ2 = lowPtOfCuboid2.z;
     }
 
     if (BigX1 <= LittleX2 || BigX2 <= LittleX1)
@@ -106,7 +106,7 @@ object SparkMainTask {
     val maxY: Int = math.min(BigY1, BigY2)
     val maxZ: Int = math.min(BigZ1, BigZ2)
 
-    val ret:Double=((maxX - minX) / 1000.0) * ((maxY - minY) / 1000.0) * ((maxZ - minZ) / 1000.0)
+    val ret: Double = ((maxX - minX) / 1000.0) * ((maxY - minY) / 1000.0) * ((maxZ - minZ) / 1000.0)
     return ret;
   }
 
@@ -263,9 +263,11 @@ object SparkMainTask {
       for (yValue <- 0 to(distanceY, 100)) {
         //z维度
         for (zValue <- 0 to(distanceZ, 100)) {
-
-          //val totalPercent=ForEach3D(cubeList1, cubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
-          val totalPercent = ForEach3D(cubeList1, cubeList2, 6700, 6700, 3400, cubeVolume1, cubeVolume2)
+          if ((xValue == 100) && (yValue == 6700) && (zValue == 100)) {
+            print(1)
+          }
+          val totalPercent = ForEach3D(cubeList1, cubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
+          //val totalPercent = ForEach3D(cubeList1, cubeList2, 6700, 6700, 3400, cubeVolume1, cubeVolume2)
           if (totalPercent > maxTotalPercent) {
             maxTotalPercent = totalPercent
           }
@@ -276,8 +278,14 @@ object SparkMainTask {
   }
 
   def ForEach3D(cubeList1: ArrayBuffer[Cube3D], cubeList2: ArrayBuffer[Cube3D], xValue: Int, yValue: Int, zValue: Int, cubeVolume1: Double, cubeVolume2: Double): Double = {
+    val tempCubeList2 = new ArrayBuffer[Cube3D]
+    cubeList2.foreach(cube => {
+      tempCubeList2 += cube.clone().asInstanceOf[Cube3D]
+    })
+
     var overlapTotalVolume = 0.0
-    cubeList2.foreach(cube2 => {
+    tempCubeList2.foreach(cube2 => {
+      //val cube3D = new Cube3D(cube2.low.,cube2.high)
       cube2.high.x += xValue
       cube2.high.y += yValue
       cube2.high.z += zValue
@@ -285,7 +293,7 @@ object SparkMainTask {
       cube2.low.y += yValue
       cube2.low.z += zValue
       cubeList1.foreach(cube1 => {
-        val overlapVolume = OverlappingVolume(cube1.low, cube1.high, cube2.low, cube2.high)
+        val overlapVolume = OverlappingVolume(cube1.high, cube1.low, cube2.high, cube2.low)
         overlapTotalVolume += overlapVolume
       })
     })
