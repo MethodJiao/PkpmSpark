@@ -36,22 +36,13 @@ object SparkMainTask {
     totalVolume
   }
 
-  //哈希算法
-  def HashString(str: String): Int = {
-    var hashCode = 0
-    if (hashCode == 0 && str.length > 0) {
-      val subChar = str
-      var i = 0
-      while ( {
-        i < str.length
-      }) {
-        hashCode = 5 * hashCode + subChar(i)
 
-        {
-          i += 1
-          i - 1
-        }
-      }
+  //哈希算法
+  def HashString(str: String): Long = {
+    var hashCode: Long = 0
+    val bytes = str.getBytes()
+    for (index <- 0 until bytes.size) {
+      hashCode = 5 * hashCode + bytes.apply(index)
     }
     hashCode
   }
