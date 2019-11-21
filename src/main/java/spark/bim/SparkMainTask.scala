@@ -1,5 +1,6 @@
 package spark.bim
 
+import com.alibaba.fastjson.JSON
 import com.mongodb.spark._
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 import org.apache.spark.sql.functions._
@@ -71,16 +72,27 @@ object SparkMainTask {
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
       val cubeList1 = VolumeAlgorithm.GetCube3DList(tableRow1)
+      //权重值
+      var weightValue = 0
+      //同表循环2
       for (tableRow2 <- dataFrame) {
-        //同表循环2
+
         if (tableRow1 != tableRow2) {
           val cubeList2 = VolumeAlgorithm.GetCube3DList(tableRow2)
           //开始计算最大交叠
           val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
           if (totalPercent > 0.8) {
-            redisConnect.lpush("Result", tableRow1.getAs[String](3))
+            //权重累加
+            weightValue += 1
           }
         }
+      }
+      //redis推荐记录
+      if (weightValue > 0) {
+        val totalJson = tableRow1.getAs[String](3)
+        val jsonObject = JSON.parseObject(totalJson)
+        jsonObject.put("WeightValue", weightValue)
+        redisConnect.lpush("Result", jsonObject.toString)
       }
     }
     resultDataFrame.show()
