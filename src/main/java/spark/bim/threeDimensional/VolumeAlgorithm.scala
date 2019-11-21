@@ -220,11 +220,7 @@ object VolumeAlgorithm {
       for (yValue <- 0 to(distanceY, 100)) {
         //z维度
         for (zValue <- 0 to(distanceZ, 100)) {
-          if ((xValue == 100) && (yValue == 6700) && (zValue == 100)) {
-            print(1)
-          }
           val totalPercent = ForEach3D(cubeList1, cubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
-          //val totalPercent = ForEach3D(cubeList1, cubeList2, 6700, 6700, 3400, cubeVolume1, cubeVolume2)
           if (totalPercent > maxTotalPercent) {
             maxTotalPercent = totalPercent
           }
@@ -243,7 +239,6 @@ object VolumeAlgorithm {
 
     var overlapTotalVolume = 0.0
     tempCubeList2.foreach(cube2 => {
-      //val cube3D = new Cube3D(cube2.low.,cube2.high)
       cube2.high.x += xValue
       cube2.high.y += yValue
       cube2.high.z += zValue
