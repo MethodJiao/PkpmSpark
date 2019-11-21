@@ -43,6 +43,7 @@ object SparkMainTask {
     val bytes = str.getBytes()
     for (index <- 0 until bytes.size) {
       hashCode = 5 * hashCode + bytes.apply(index)
+      hashCode %= 2353639
     }
     hashCode
   }
