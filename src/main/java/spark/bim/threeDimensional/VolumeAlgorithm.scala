@@ -214,15 +214,27 @@ object VolumeAlgorithm {
     })
     var maxTotalPercent = 0.0
     //开始三维对比
-    //x维度
-    for (xValue <- 0 to(distanceX, 100)) {
-      //y维度
-      for (yValue <- 0 to(distanceY, 100)) {
-        //z维度
-        for (zValue <- 0 to(distanceZ, 100)) {
-          val totalPercent = ForEach3D(cubeList1, cubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
-          if (totalPercent > maxTotalPercent) {
-            maxTotalPercent = totalPercent
+    //角度
+    for (angle <- 0 to 3) {
+      //深拷贝
+      val tempCubeList2 = new ArrayBuffer[Cube3D]
+      cubeList2.foreach(cube => {
+        tempCubeList2 += cube.clone().asInstanceOf[Cube3D]
+      })
+      tempCubeList2.foreach(cube3d => {
+        cube3d.rotation(cube2MiniX, cube2MiniY, (angle / 2) * math.Pi)
+      })
+      //x维度
+      for (xValue <- 0 to(distanceX, 100)) {
+        //y维度
+        for (yValue <- 0 to(distanceY, 100)) {
+          //z维度
+          for (zValue <- 0 to(distanceZ, 100)) {
+
+            val totalPercent = ForEach3D(cubeList1, tempCubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
+            if (totalPercent > maxTotalPercent) {
+              maxTotalPercent = totalPercent
+            }
           }
         }
       }
@@ -245,6 +257,7 @@ object VolumeAlgorithm {
       cube2.low.x += xValue
       cube2.low.y += yValue
       cube2.low.z += zValue
+
       cubeList1.foreach(cube1 => {
         val overlapVolume = OverlappingVolume(cube1.high, cube1.low, cube2.high, cube2.low)
         overlapTotalVolume += overlapVolume

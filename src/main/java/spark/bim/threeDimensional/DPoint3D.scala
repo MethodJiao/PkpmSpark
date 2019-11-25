@@ -9,12 +9,12 @@ class DPoint3D(mx: Int, my: Int, mz: Int) {
   //依据极坐标圆方程化简式
   //x` = x * cos(α) - y * sin(α)
   //y` = y * cos(α) + x * sin(α)
-  //顺90度
-  def rotation(rx: Int, ry: Int): Unit = {
-    val tempX = (y - ry) + rx
-    val tempY = -(x - rx) + ry
-    x = tempX
-    y = tempY
+  //旋转
+  def rotation(rx: Int, ry: Int, angle: Double): Unit = {
+    val tempX = ((x - rx) * math.cos(angle)) - ((y - ry) * math.sin(angle))
+    val tempY = ((y - ry) * math.cos(angle)) + ((x - rx) * math.sin(angle))
+    x = tempX.toInt
+    y = tempY.toInt
   }
 
   def distance(pt: DPoint3D): Double = {

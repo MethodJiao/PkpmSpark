@@ -93,6 +93,7 @@ object SparkMainTask {
         val jsonObject = JSON.parseObject(totalJson)
         jsonObject.put("WeightValue", weightValue)
         val key = jsonObject.getInteger("KeyValue")
+        jsonObject.remove("KeyValue")
         redisConnect.lpush(key.toString, jsonObject.toString)
       }
     }
