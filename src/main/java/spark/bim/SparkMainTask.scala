@@ -37,7 +37,6 @@ object SparkMainTask {
     totalVolume
   }
 
-
   //哈希算法
   def HashString(str: String): Long = {
     var hashCode: Long = 0
@@ -93,10 +92,10 @@ object SparkMainTask {
         val totalJson = tableRow1.getAs[String](3)
         val jsonObject = JSON.parseObject(totalJson)
         jsonObject.put("WeightValue", weightValue)
-        val key = jsonObject.getInteger("KeyValue")
+        val key = jsonObject.getString("KeyValue")
         jsonObject.remove("KeyValue")
         //插入推荐数据
-        redisConnect.lpush(key.toString, jsonObject.toString)
+        redisConnect.lpush(key, jsonObject.toString)
       }
     }
     resultDataFrame.show()
