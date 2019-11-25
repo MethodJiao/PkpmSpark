@@ -68,6 +68,8 @@ object SparkMainTask {
     resultDataFrame.show()
 
     val redisConnect = new RedisConnector().GetRedisConnect()
+    //清除历史数据
+    redisConnect.flushAll()
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {
@@ -76,7 +78,6 @@ object SparkMainTask {
       var weightValue = 0
       //同表循环2
       for (tableRow2 <- dataFrame) {
-
         if (tableRow1 != tableRow2) {
           val cubeList2 = VolumeAlgorithm.GetCube3DList(tableRow2)
           //开始计算最大交叠
@@ -94,40 +95,11 @@ object SparkMainTask {
         jsonObject.put("WeightValue", weightValue)
         val key = jsonObject.getInteger("KeyValue")
         jsonObject.remove("KeyValue")
+        //插入推荐数据
         redisConnect.lpush(key.toString, jsonObject.toString)
       }
     }
     resultDataFrame.show()
-    //    resultDataFrame = resultDataFrame.withColumn("Percent", UCalculatePercent(col("HighPt"), col("LowPt"), col("TotalVolume")))
-    //    resultDataFrame.show()
-
-    //        resultDataFrame.foreach(document => {
-    //          val documentSize = document.size
-    //          for (listIndex <- 0 until documentSize)
-    //            document.getList(listIndex).toArray.foreach(line => {
-    //              print(line)
-    //            })
-    //        })
-
-    //    val kafkaConsumer = new KafkaFactory().GetKafkaConsumer("order")
-    //    val redisConnect = new RedisConnector().GetRedisConnect()
-    //
-    //    //rdd计算部分
-    //    while (true) {
-    //      val records = kafkaConsumer.poll(Duration.ofMillis(100)) //task触发源
-    //      val iterator = records.iterator()
-    //      while (iterator.hasNext) {
-    //        //查mongo
-    //        val resultDateFrame = MongodbSearcher(sparkSession)
-    //        val array = resultDateFrame.collect()
-    //        if (array.length > 0) {
-    //          RedisInserter(array(0)(0).toString, redisConnect)
-    //        }
-    //        iterator.next()
-    //      }
-    //    }
-    //    kafkaConsumer.close()
-    //    redisConnect.close()
     redisConnect.close()
     sparkSession.stop()
   }
