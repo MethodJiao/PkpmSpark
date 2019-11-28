@@ -79,7 +79,7 @@ object SparkMainTask {
       for (tableRow2 <- dataFrame) {
         if (tableRow1 != tableRow2) {
           val cubeList2 = VolumeAlgorithm.GetCube3DList(tableRow2)
-          //开始计算最大交叠
+          //开始计算最大相似系数
           val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
           if (totalPercent > 0.8) {
             //权重累加
