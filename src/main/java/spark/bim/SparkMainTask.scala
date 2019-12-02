@@ -52,7 +52,7 @@ object SparkMainTask {
     //mongo spark通信槽
     val sparkSession = SparkSession.builder()
       .appName("PKPMBimAnalyse")
-      .config("spark.mongodb.input.uri", "mongodb://10.100.140.35/mydb.netflows")
+      .config("spark.mongodb.input.uri", "mongodb://10.100.140.127/mydb.netflows")
       .master("local")
       .getOrCreate()
 
@@ -68,7 +68,7 @@ object SparkMainTask {
 
     val redisConnect = new RedisConnector().GetRedisConnect()
     //清除历史数据
-    redisConnect.flushAll()
+    //    redisConnect.flushAll()
     //算最大交叠
     val dataFrame = resultDataFrame.collect()
     for (tableRow1 <- dataFrame) {

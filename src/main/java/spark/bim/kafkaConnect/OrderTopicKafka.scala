@@ -10,7 +10,7 @@ class OrderTopicKafka extends ITopicKafka {
     //kafka配置
     val topic = "order"
     val props = new Properties()
-    props.put("bootstrap.servers", "10.100.140.35:9092")
+    props.put("bootstrap.servers", "10.100.140.127:9092")
     props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     props.put("group.id", "spark")

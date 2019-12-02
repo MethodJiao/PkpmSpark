@@ -13,8 +13,8 @@ class DPoint3D(mx: Int, my: Int, mz: Int) {
   def rotation(rx: Int, ry: Int, angle: Double): Unit = {
     val tempX = ((x - rx) * math.cos(angle)) - ((y - ry) * math.sin(angle))
     val tempY = ((y - ry) * math.cos(angle)) + ((x - rx) * math.sin(angle))
-    x = tempX.toInt
-    y = tempY.toInt
+    x = tempX.toInt + rx
+    y = tempY.toInt + ry
   }
 
   def distance(pt: DPoint3D): Double = {
