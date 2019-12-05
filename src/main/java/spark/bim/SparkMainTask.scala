@@ -58,48 +58,53 @@ object SparkMainTask {
 
     //UDF注册
     val UCalculateVolume = udf(UdfCalculateVolume _)
-
     var resultDataFrame = MongodbSearcher(sparkSession)
-    //新增列TotalVolume计算总体积 TotalJson整行json数据
+    //新增列TotalVolume计算总体积 TotalJson整行json数据 编Guid
     resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt")))
     resultDataFrame = resultDataFrame.withColumn("TotalJson", to_json(col("RootNode")))
     resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
     resultDataFrame.show()
 
-    val redisConnect = new RedisConnector().GetRedisConnect()
     //清除历史数据
-    //    redisConnect.flushAll()
-    //算最大交叠
-    val dataFrame = resultDataFrame.collect()
-    for (tableRow1 <- dataFrame) {
-      val cubeList1 = VolumeAlgorithm.GetCube3DList(tableRow1)
-      //权重值
-      var weightValue = 0
-      //同表循环2
-      for (tableRow2 <- dataFrame) {
-        if (tableRow1 != tableRow2) {
-          val cubeList2 = VolumeAlgorithm.GetCube3DList(tableRow2)
-          //开始计算最大相似系数
-          val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, tableRow1.getAs[Double](2), tableRow2.getAs[Double](2))
-          if (totalPercent > 0.8) {
-            //权重累加
-            weightValue += 1
-          }
+    //RedisConnector.getInstance.GetRedisConnect().flushAll()
+    //初始行数
+    val rowCount = resultDataFrame.count() - 1
+    //求笛卡尔积
+    resultDataFrame = resultDataFrame.join(resultDataFrame, resultDataFrame("TotalVolume") =!= resultDataFrame("TotalVolume"), "inner")
+    //削减笛卡尔分区
+    resultDataFrame = resultDataFrame.coalesce(200)
+    //权重值
+    var weightValue = 0
+    var forNumCount: Long = 0
+    resultDataFrame.foreach(row => {
+      val cubeList1 = VolumeAlgorithm.GetCube3DList(row.getAs[mutable.WrappedArray[GenericRow]](0), row.getAs[mutable.WrappedArray[GenericRow]](1))
+      val cubeList2 = VolumeAlgorithm.GetCube3DList(row.getAs[mutable.WrappedArray[GenericRow]](4), row.getAs[mutable.WrappedArray[GenericRow]](5))
+      val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, row.getAs[Double](2), row.getAs[Double](6))
+      if (totalPercent > 0.8) {
+        //权重累加
+        weightValue += 1
+      }
+      //推荐时机计数
+      forNumCount += 1
+      if (forNumCount == rowCount) {
+        //redis推荐记录
+        if (weightValue > 0) {
+          val totalJson = row.getAs[String](3)
+          val jsonObject = JSON.parseObject(totalJson)
+          jsonObject.put("WeightValue", weightValue)
+          val key = jsonObject.getString("KeyValue")
+          jsonObject.remove("KeyValue")
+          //插入推荐数据
+          val redisConnect = RedisConnector.getInstance.GetRedisConnect()
+          redisConnect.lpush(key, jsonObject.toString)
+
         }
+        weightValue = 0
+        forNumCount = 0
       }
-      //redis推荐记录
-      if (weightValue > 0) {
-        val totalJson = tableRow1.getAs[String](3)
-        val jsonObject = JSON.parseObject(totalJson)
-        jsonObject.put("WeightValue", weightValue)
-        val key = jsonObject.getString("KeyValue")
-        jsonObject.remove("KeyValue")
-        //插入推荐数据
-        redisConnect.lpush(key, jsonObject.toString)
-      }
-    }
+    })
     resultDataFrame.show()
-    redisConnect.close()
+    RedisConnector.getInstance.GetRedisConnect().close()
     sparkSession.stop()
   }
 }

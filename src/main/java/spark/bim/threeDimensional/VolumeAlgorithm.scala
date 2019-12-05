@@ -1,6 +1,5 @@
 package spark.bim.threeDimensional
 
-import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions.GenericRow
 
 import scala.collection.mutable
@@ -226,9 +225,9 @@ object VolumeAlgorithm {
         cube3d.rotation(cube2MiniX, cube2MiniY, (angle / 2) * math.Pi)
       })
       //x维度
-      for (xValue <- 0 to(distanceX, 100)) {
+      for (xValue <- 0 to(distanceX, 200)) {
         //y维度
-        for (yValue <- 0 to(distanceY, 100)) {
+        for (yValue <- 0 to(distanceY, 200)) {
           //z维度
           for (zValue <- 0 to(distanceZ, 10)) {
             val totalPercent = ForEach3D(cubeList1, tempCubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
@@ -270,9 +269,7 @@ object VolumeAlgorithm {
   }
 
   //获取单条数据内的立方体合集
-  def GetCube3DList(row: Row): ArrayBuffer[Cube3D] = {
-    val highPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](0)
-    val lowPts: mutable.WrappedArray[GenericRow] = row.getAs[mutable.WrappedArray[GenericRow]](1)
+  def GetCube3DList(highPts: mutable.WrappedArray[GenericRow], lowPts: mutable.WrappedArray[GenericRow]): ArrayBuffer[Cube3D] = {
     val lowHighZip = highPts.zip(lowPts)
     val cubeList = ArrayBuffer.empty[Cube3D] //单条数据内所有的cube
     lowHighZip.foreach(lowHigh => {
