@@ -53,7 +53,6 @@ object SparkMainTask {
     val sparkSession = SparkSession.builder()
       .appName("PKPMBimAnalyse")
       .config("spark.mongodb.input.uri", "mongodb://10.100.140.127/mydb.netflows")
-      .master("local")
       .getOrCreate()
 
     //UDF注册
@@ -77,9 +76,11 @@ object SparkMainTask {
     var weightValue = 0
     var forNumCount: Long = 0
     resultDataFrame.foreach(row => {
+      println("============================== one row ==============================")
       val cubeList1 = VolumeAlgorithm.GetCube3DList(row.getAs[mutable.WrappedArray[GenericRow]](0), row.getAs[mutable.WrappedArray[GenericRow]](1))
       val cubeList2 = VolumeAlgorithm.GetCube3DList(row.getAs[mutable.WrappedArray[GenericRow]](4), row.getAs[mutable.WrappedArray[GenericRow]](5))
       val totalPercent = VolumeAlgorithm.CalculatePercent(cubeList1, cubeList2, row.getAs[Double](2), row.getAs[Double](6))
+
       if (totalPercent > 0.8) {
         //权重累加
         weightValue += 1
@@ -108,4 +109,3 @@ object SparkMainTask {
     sparkSession.stop()
   }
 }
-
