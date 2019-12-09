@@ -52,7 +52,7 @@ object SparkMainTask {
     //mongo spark通信槽
     val sparkSession = SparkSession.builder()
       .appName("PKPMBimAnalyse")
-      .config("spark.mongodb.input.uri", "mongodb://10.100.140.127/mydb.netflows")
+      .config("spark.mongodb.input.uri", "mongodb://10.100.140.9/mydb.netflows")
       .getOrCreate()
 
     //UDF注册

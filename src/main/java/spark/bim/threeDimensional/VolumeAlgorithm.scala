@@ -230,7 +230,6 @@ object VolumeAlgorithm {
         for (yValue <- 0 to(distanceY, 200)) {
           //z维度
           for (zValue <- 0 to(distanceZ, 10)) {
-            println("==angle:" + angle, "==xValue:" + xValue + "/" + distanceX, "==yValue:" + yValue + "/" + distanceY, "==zValue:" + zValue + "/" + distanceZ)
             val totalPercent = ForEach3D(cubeList1, tempCubeList2, xValue, yValue, zValue, cubeVolume1, cubeVolume2)
             if (totalPercent > maxTotalPercent) {
               maxTotalPercent = totalPercent
