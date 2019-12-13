@@ -20,6 +20,84 @@
 3.mongodb链接实例配置在SparkMainTask的main函数中，请跟据需要修改
 ## 编译
 本项目配置了maven编译，在idea命令行执行`mvn assembly:assembly`即可编译生成
+## 数据源
+可在mongodb中仿造执行如下insert语句制造数据，数据格式如下：
+
+1.ChildNode中数组可嵌入多个立方体以此描述三维空间
+
+2.HighPt，LowPt分别为立方体体的对角线端点两点
+
+3.Name可以存储当前立方体表述对象名
+
+4.Origin为当前立方体的原点定位
+
+5.YPRangle为立方体姿态角
+```
+db.getCollection("netflows").insert( {
+    _id: ObjectId("5dededecb3e6784f020c4e90"),
+    RootNode: {
+        ChildNode: [
+            {
+                HighPt: {
+                    x: 83956,
+                    y: 76703,
+                    z: 2900
+                },
+                IsSet: {
+                    set: false
+                },
+                LowPt: {
+                    x: 80155,
+                    y: 76502,
+                    z: 2500
+                },
+                Name: {
+                    name: "PBStructBeam"
+                },
+                Origin: {
+                    x: 83955.9781857537,
+                    y: 76602.633138063,
+                    z: 2900
+                },
+                YPRangle: {
+                    pitch: 0,
+                    roll: 90,
+                    yaw: -90
+                }
+            },
+            {
+                HighPt: {
+                    x: 83557,
+                    y: 74903,
+                    z: 2900
+                },
+                IsSet: {
+                    set: false
+                },
+                LowPt: {
+                    x: 80756,
+                    y: 74702,
+                    z: 2420
+                },
+                Name: {
+                    name: "PBStructBeam"
+                },
+                Origin: {
+                    x: 83556.179,
+                    y: 74802.2127855456,
+                    z: 2900
+                },
+                YPRangle: {
+                    pitch: 0,
+                    roll: 90,
+                    yaw: -90
+                }
+            }
+        ],
+        KeyValue: NumberInt("-6567")
+    }
+} );
+```
 ## 运行
 示例：
 ```
