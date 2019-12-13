@@ -21,7 +21,12 @@
 ## 编译
 本项目配置了maven编译，在idea命令行执行`mvn assembly:assembly`即可编译生成
 ## 数据源
-可在mongodb中仿造执行如下insert语句制造数据，数据格式如下：
+本项目数据源来自mongodb，数据采集可以传入kafka借由如下链接项目完成kafka向mongodb的同步，采集端只需保证json格式：
+
+[https://github.com/MethodJiao/Kafka2Mongodb](https://github.com/MethodJiao/Kafka2Mongodb)
+
+
+也可直接在mongodb中仿造执行如下insert语句制造数据，数据格式如下：
 
 1.ChildNode中数组可嵌入多个立方体以此描述三维空间
 
