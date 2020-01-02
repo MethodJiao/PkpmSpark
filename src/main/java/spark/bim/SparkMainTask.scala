@@ -58,7 +58,7 @@ object SparkMainTask {
     //UDF注册
     val UCalculateVolume = udf(UdfCalculateVolume _)
     var resultDataFrame = MongodbSearcher(sparkSession)
-    //新增列TotalVolume计算总体积 TotalJson整行json数据 编Guid
+    //新增列TotalVolume计算总体积 TotalJson整行json数据
     resultDataFrame = resultDataFrame.withColumn("TotalVolume", UCalculateVolume(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt")))
     resultDataFrame = resultDataFrame.withColumn("TotalJson", to_json(col("RootNode")))
     resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
@@ -67,11 +67,11 @@ object SparkMainTask {
     //清除历史数据
     //RedisConnector.getInstance.GetRedisConnect().flushAll()
     //初始行数
-    val rowCount = resultDataFrame.count() - 1
+    val rowCount = resultDataFrame.count().asInstanceOf[Int]
     //求笛卡尔积
     resultDataFrame = resultDataFrame.join(resultDataFrame, resultDataFrame("TotalVolume") =!= resultDataFrame("TotalVolume"), "inner")
     //削减笛卡尔分区
-    resultDataFrame = resultDataFrame.coalesce(200)
+    resultDataFrame = resultDataFrame.coalesce(rowCount)
     //权重值
     var weightValue = 0
     var forNumCount: Long = 0
