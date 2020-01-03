@@ -53,6 +53,7 @@ object SparkMainTask {
     val sparkSession = SparkSession.builder()
       .appName("PKPMBimAnalyse")
       .config("spark.mongodb.input.uri", "mongodb://10.100.140.9/mydb.netflows")
+      .master("local")
       .getOrCreate()
 
     //UDF注册
@@ -63,17 +64,17 @@ object SparkMainTask {
     resultDataFrame = resultDataFrame.withColumn("TotalJson", to_json(col("RootNode")))
     resultDataFrame = resultDataFrame.select(col("RootNode.ChildNode.HighPt"), col("RootNode.ChildNode.LowPt"), col("TotalVolume"), col("TotalJson"))
     resultDataFrame.show()
+
     //初始行数
     val rowCount = resultDataFrame.count() - 1
-
+    println("初始行数 : " + (rowCount + 1))
     //清除历史数据
     //RedisConnector.getInstance.GetRedisConnect().flushAll()
-
     //求笛卡尔积
     resultDataFrame = resultDataFrame.join(resultDataFrame, resultDataFrame("TotalVolume") =!= resultDataFrame("TotalVolume"), "inner")
     //削减笛卡尔分区
     resultDataFrame = resultDataFrame.coalesce(200)
-    
+
     //权重值
     var weightValue = 0
     var forNumCount: Long = 0
