@@ -114,7 +114,7 @@ bin/spark-submit --class spark.bim.SparkMainTask --master spark://10.100.140.35:
 
 2.jar包编译路径 /Users/method.jiao/code/pkpmspark/target/pkpmspark-1.0-SNAPSHOT-jar-with-dependencies.jar
 
-## PS
+# PS
 1.如果想在idea直接本地启动不上传task到spark集群的话需要在sparksession加个.master("local")如：
 ```
 val sparkSession = SparkSession.builder()
